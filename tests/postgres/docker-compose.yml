@@ -1,0 +1,11 @@
+# docker compose -f tests/postgres/docker-compose.yml up -d
+# docker compose -f tests/postgres/docker-compose.yml down
+
+services:
+  db:
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - 5434:5432

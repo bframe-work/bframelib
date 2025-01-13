@@ -121,6 +121,26 @@ A function to pull the maximum time range of the currently configured invoices. 
 **Returns:**
 A tuple with the first element representing the minimum start date of all invoices and the second element representing maximum end date of all invoices.
 
+### `Client.set_source(connect_sql, init_schema=False)`
+A function to set the `src` database bframe pulls data from. It will detach the existing `src` during execution.
+
+**Parameters:**
+* `connect_sql` - A SQL string that is executed to assign the `src` database. The function expects an `ATTACH` statement using the [duckdb SQL dialect](https://duckdb.org/docs/sql/statements/attach.html). An example of what this could look like: `"ATTACH ':memory:' AS src;"`
+* `init_schema` - A boolean with a default value of `False`. If set to `True` the `src` database attached will have the bframe schema executed on it.
+
+**Returns:**
+Void
+
+### `Client.set_branch_source(connect_sql=None, init_schema=False)`
+A function to set the `brch` database, which is used for [branching](https://bframe.work/features/branching.html). It will detach the existing `brch` during execution. If no branch source is set bframe will default to the `src` database.
+
+**Parameters:**
+* `connect_sql` - A SQL string that is executed to assign the `brch` database. The function expects an `ATTACH` statement using the [duckdb SQL dialect](https://duckdb.org/docs/sql/statements/attach.html). An example of what this could look like: `"ATTACH ':memory:' AS brch;"`. If `None` is passed or another falsey value the `brch` will be detached. 
+* `init_schema` - A boolean with a default value of `False`. If set to `True` the `brch` database attached will have the bframe schema executed on it.
+
+**Returns:**
+Void
+
 ### `Client.interpreter.add_table_template(name, template)`
 A function on the stored `Interpreter` class that sets a [user defined view](https://bframe.work/features/user_defined_view.html).
 

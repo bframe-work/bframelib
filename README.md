@@ -27,14 +27,15 @@ Below is a short example to show the most direct usage of `bframelib`.
 
 ```python
 from bframelib import Client
-
-# The client will create a duckdb connection if it is not provided
-bf = Client(init_client=True, con=None, **{
+config = {
     "org_id": 1,
     "env_id": 1,
     "branch_id": 1,
     "rating_range": ['2025-01-01', '2026-01-01']
-})
+}
+
+# The client will create a duckdb connection if it is not provided
+bf = Client(config, init_core_schema=True, con=None)
 
 # Set up your source data (bframe uses duckdb if a source is not specified)
 bf.execute("""

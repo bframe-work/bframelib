@@ -71,7 +71,7 @@ class Interpreter:
         # Also comments at the end of the file are fully breaking (need a return at the end of the file)
         return sqlparse.format(query, strip_comments=True).strip()
 
-    def var_replacement(self, query: str, config: dict):
+    def var_replacement(self, query: str, vars: dict):
         full_match = re.search(r"_BF_(\w*\b)", query)
 
         # No matches we return the query back
@@ -82,35 +82,40 @@ class Interpreter:
         variable_name = full_match.group(1)
         match variable_name:
             case 'BRANCH_ID':
-                new_query = re.sub(full_match.group(), str(config.get('branch_id')), new_query)
+                new_query = re.sub(full_match.group(), str(vars.get('branch_id')), new_query)
             case 'ORG_ID':
-                new_query = re.sub(full_match.group(), str(config.get('org_id')), new_query)
+                new_query = re.sub(full_match.group(), str(vars.get('org_id')), new_query)
             case 'ENV_ID':
-                new_query = re.sub(full_match.group(), str(config.get('env_id')), new_query)
+                new_query = re.sub(full_match.group(), str(vars.get('env_id')), new_query)
             case 'SYSTEM_DT':
-                new_query = re.sub(full_match.group(), f"'{config.get('system_dt')}'", new_query)
+                new_query = re.sub(full_match.group(), f"'{vars.get('system_dt')}'", new_query)
             case 'EVENT_SOURCE':
-                new_query = re.sub(full_match.group(), str(config.get('events_source')), new_query)
+                new_query = re.sub(full_match.group(), str(vars.get('events_source')), new_query)
             case 'RATING_AS_OF_DT':
-                new_query = re.sub(full_match.group(), f"'{config.get('rating_as_of_dt')}'", new_query)
+                new_query = re.sub(full_match.group(), f"'{vars.get('rating_as_of_dt')}'", new_query)
             case 'DEDUP_BRANCH_EVENTS':
-                new_query = re.sub(full_match.group(), str(config.get('dedup_branch_events')), new_query)
+                new_query = re.sub(full_match.group(), str(vars.get('dedup_branch_events')), new_query)
             case 'RATING_RANGE_START':
                 rating_range_start = "''"
-                if (len(config.get('rating_range')) == 2):
-                    rating_range_start = f"'{config.get('rating_range')[0]}'"
+                if (len(vars.get('rating_range')) == 2):
+                    rating_range_start = f"'{vars.get('rating_range')[0]}'"
                 new_query = re.sub(full_match.group(), rating_range_start, new_query)
             case 'RATING_RANGE_END':
                 rating_range_end = "''"
-                if (len(config.get('rating_range')) == 2):
-                    rating_range_end = f"'{config.get('rating_range')[1]}'"
+                if (len(vars.get('rating_range')) == 2):
+                    rating_range_end = f"'{vars.get('rating_range')[1]}'"
                 new_query = re.sub(full_match.group(), rating_range_end, new_query)
             case 'CONTRACT_IDS':
-                new_query = re.sub(full_match.group(), format_array(config.get('contract_ids')), new_query)
+                new_query = re.sub(full_match.group(), format_array(vars.get('contract_ids')), new_query)
+            case 'BRANCH_SOURCE_EXIST':
+                exists = 'false'
+                if vars.get('branch_source_exists'):
+                    exists = 'true'
+                new_query = re.sub(full_match.group(), exists, new_query)
             case _:
                 raise Exception(f"Unknown variable: {variable_name}")
         
-        return self.var_replacement(new_query, config)
+        return self.var_replacement(new_query, vars)
 
 
     def table_replacement(self, query, count=0, verbose=False):
@@ -146,10 +151,10 @@ class Interpreter:
 
         return self.table_replacement(resolved_query, count=(count+1), verbose=verbose)
     
-    def exec(self, config: dict, query: str, verbose=False):
+    def exec(self, vars: dict, query: str, verbose=False):
         resolved_query = self.comment_replacement(query)
         resolved_query = self.table_replacement(resolved_query, verbose=verbose)
-        resolved_query = self.var_replacement(resolved_query, config)
+        resolved_query = self.var_replacement(resolved_query, vars)
         resolved_query = Template(resolved_query).render()
         
         if (verbose):

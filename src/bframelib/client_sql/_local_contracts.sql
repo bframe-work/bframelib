@@ -1,5 +1,9 @@
 SELECT *
+{% if _BF_BRANCH_SOURCE_EXIST == true %}
+FROM brch.contracts
+{% else %}
 FROM src.contracts
+{% endif %}
 WHERE org_id = _BF_ORG_ID
     AND env_id = _BF_ENV_ID
     AND branch_id = _BF_BRANCH_ID

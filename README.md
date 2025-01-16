@@ -35,7 +35,7 @@ config = {
 }
 
 # The client will create a duckdb connection if it is not provided
-bf = Client(config, init_core_schema=True, con=None)
+bf = Client(config)
 
 # Set up your source data (bframe uses duckdb if a source is not specified)
 bf.execute("""
@@ -88,22 +88,44 @@ print(res.fetch_df().to_string())
 ## API
 The `bframelib` is composed of a `Client` and `Interpreter`. The `Client` is the primary interface for library users and the `Interpreter` is the engine that powers the business logic. Both are exposed through the library but only more advanced use cases will utilize the interpreter directly.
 
-### `Client.config`
+### `Source`
+A named tuple that represents a source.
+
+#### `__init__(src_type, connect_sql, init_schema)`
+The initialization of the named tuple.
+
+**Parameters:**
+* `src_type` - An enum string to represent the source that is being attach. Possible values include ('core', 'branch', 'events').
+* `connect_sql` - A SQL string that is executed to assign the specified source. The function expects an `ATTACH` statement using the [duckdb SQL dialect](https://duckdb.org/docs/sql/statements/attach.html). An example of what this could look like: `"ATTACH ':memory:' AS src;"`
+* `init_schema` - A boolean with a default value of `False`. If set to `True` the source database attached will have the bframe schema executed on it.
+
+### `Client`
+A class that represents the bframe library interface for a duckdb connection.
+
+#### `config`
 A property to view the current configuration options.
 
 **Returns:**
 A dictionary of the library configurations that have been set.
 
-### `Client.set_config(config_updates)`
+#### `__init__(config, sources, con)`
+The initialization of the `Client` class.
+
+**Parameters:**
+* `config` - A dictionary containing configuration options. Detailed option definitions can be found [here](https://bframe.work/interface_api/variables.html).
+* `sources` - A list of `Source` tuples to be set. If no list is passed a default core source will be passed.
+* `con` - A pre-initialized [`duckdb connection`](https://duckdb.org/docs/api/python/reference/#duckdb.DuckDBPyConnection). If this is not present a new connection will be created.
+
+#### `set_config(config_updates)`
 A function to set configuration options.
 
 **Parameters:**
-* `config_updates` - A dictionary containing one or more updates to the library config.
+* `config_updates` - A dictionary containing one or more updates to the library config. Detailed option definitions can be found [here](https://bframe.work/interface_api/variables.html).
 
 **Returns:**
 Void
 
-### `Client.execute(query)`
+#### `execute(query)`
 A function to interpret bframe SQL and execute it on the given duckdb connection.
 
 **Parameters:**
@@ -112,7 +134,7 @@ A function to interpret bframe SQL and execute it on the given duckdb connection
 **Returns:**
 A [`DuckDBPyConnection`](https://duckdb.org/docs/api/python/reference/#duckdb.DuckDBPyConnection) that holds the results of the executed SQL statement.
 
-### `Client.get_price_span_date_range(product_types)`
+#### `get_price_span_date_range(product_types)`
 A function to pull the maximum time range of the currently configured invoices. This can enable effective use of event source partitions (e.g. only sourcing events that are needed for invoice generation).
 
 **Parameters:**
@@ -121,7 +143,7 @@ A function to pull the maximum time range of the currently configured invoices. 
 **Returns:**
 A tuple with the first element representing the minimum start date of all invoices and the second element representing maximum end date of all invoices.
 
-### `Client.set_source(connect_sql, init_schema=False)`
+#### `set_source(Source)`
 A function to set the `src` database bframe pulls data from. It will detach the existing `src` during execution.
 
 **Parameters:**
@@ -131,17 +153,7 @@ A function to set the `src` database bframe pulls data from. It will detach the 
 **Returns:**
 Void
 
-### `Client.set_branch_source(connect_sql=None, init_schema=False)`
-A function to set the `brch` database, which is used for [branching](https://bframe.work/features/branching.html). It will detach the existing `brch` during execution. If no branch source is set bframe will default to the `src` database.
-
-**Parameters:**
-* `connect_sql` - A SQL string that is executed to assign the `brch` database. The function expects an `ATTACH` statement using the [duckdb SQL dialect](https://duckdb.org/docs/sql/statements/attach.html). An example of what this could look like: `"ATTACH ':memory:' AS brch;"`. If `None` is passed or another falsey value the `brch` will be detached. 
-* `init_schema` - A boolean with a default value of `False`. If set to `True` the `brch` database attached will have the bframe schema executed on it.
-
-**Returns:**
-Void
-
-### `Client.interpreter.add_table_template(name, template)`
+#### `interpreter.add_table_template(name, template)`
 A function on the stored `Interpreter` class that sets a [user defined view](https://bframe.work/features/user_defined_view.html).
 
 **Parameters:**

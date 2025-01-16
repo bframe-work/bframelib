@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS branches (
     id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT now(),
     name TEXT NOT NULL,
-    source TEXT,
     org_id INTEGER,
     env_id INTEGER,
     UNIQUE (id, org_id, env_id)

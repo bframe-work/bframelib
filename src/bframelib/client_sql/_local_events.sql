@@ -1,6 +1,8 @@
 SELECT *
 {% if _BF_BRANCH_SOURCE_EXIST == true %}
 FROM brch.events
+{% elif _BF_EVENTS_SOURCE_LOCAL == true %}
+FROM evt.events
 {% else %}
 FROM src.events
 {% endif %}

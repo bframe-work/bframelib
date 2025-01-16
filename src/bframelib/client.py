@@ -1,21 +1,32 @@
 import datetime
 import duckdb
+from typing import NamedTuple
 from pathlib import Path
 from . import interpreter, PATH
 
 REQUIRED_FIELDS = ['org_id', 'env_id', 'branch_id']
 
+class Source(NamedTuple):
+    src_type: str
+    connect_sql: str
+    init_schema: bool
+
+DEFAULT_SOURCES = [
+    Source('core', "ATTACH ':memory:' AS src;", True),
+]
+
+
 class Client():
-    # TODO This needs to be refactored where we take in kwargs, and one of them is config
-    # set_config() is very useful, but we can't just throw kwargs into it... for numerous reasons
+    branch_source_exists: bool = False
+    events_source_exists: bool = False
+    # Manually set to point local events at the events source
+    events_source_local: bool = False
+
     def __init__(
             self,
-            config,
-            core_source_connect=None,
-            branch_source_connect=None,
-            init_core_schema=False,
-            init_branch_schema=False,
-            con=None,
+            config: dict,
+            sources: list[Source] | None = DEFAULT_SOURCES,
+            con: duckdb.DuckDBPyConnection | None = None,
         ):
 
         if (con == None):
@@ -23,6 +34,7 @@ class Client():
         else:
             self.con = con
 
+        # TODO Would be better typed
         self._config = {
             'org_id': None,
             'env_id': None,
@@ -30,13 +42,13 @@ class Client():
             'system_dt': (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat(),
             'rating_as_of_dt': datetime.datetime.now().isoformat(),
             'rating_range': [],
-            'events_source': 'src.events',
             'contract_ids': [],
             'dedup_branch_events': False
         }
         self.set_config(config)
-        self.set_source(core_source_connect, init_core_schema)
-        self.set_branch_source(branch_source_connect, init_branch_schema)
+        
+        for source in sources:
+            self.set_source(source)
 
         # Validate required fields
         missing_fields = {field: self._config[field] for field in REQUIRED_FIELDS if self._config[field] is None}
@@ -48,6 +60,47 @@ class Client():
     @property
     def config(self):
         return self._config.copy()
+    
+    def set_source(self, source: Source):
+        src_type, connect_sql, init_schema = source
+
+        if src_type == 'core':
+            self.con.execute('USE memory; DETACH DATABASE IF EXISTS src;')
+
+            if connect_sql:
+                self.con.execute(connect_sql)
+            else:
+                self.con.execute("ATTACH ':memory:' AS src;")
+
+            if init_schema:
+                schema = Path(f'{PATH}/bootstrap_sql/0_init.sql').read_text()
+                self.con.execute('USE src;')
+                self.con.execute(schema)
+        elif src_type == 'branch':
+            self.con.execute('DETACH DATABASE IF EXISTS brch;')
+
+            # The interpreter will use the src database in the case there is no brch
+            if connect_sql:
+                self.con.execute(connect_sql)
+
+                if init_schema:
+                    schema = Path(f'{PATH}/bootstrap_sql/0_init.sql').read_text()
+                    self.con.execute('USE brch;')
+                    self.con.execute(schema)
+                    self.con.execute('USE memory;')
+                
+                self.branch_source_exists = True
+            else:
+                self.branch_source_exists = False
+        elif src_type == 'events':
+            self.con.execute('USE memory; DETACH DATABASE IF EXISTS evt;')
+
+            # The interpreter will use the src database in the case there is no evt
+            if connect_sql:
+                self.con.execute(connect_sql)
+                self.events_source_exists = True
+            else:
+                self.events_source_exists = False
     
     def set_config(self, config_updates: dict):
         # Handle unknown fields
@@ -66,45 +119,12 @@ class Client():
                     self.con.execute(new_value)
 
                 self._config[key] = new_value
-    
-    def set_source(self, connect_sql, init_schema=False):
-        self.con.execute('USE memory; DETACH DATABASE IF EXISTS src;')
-
-        if connect_sql:
-            self.con.execute(connect_sql)
-        else:
-            self.con.execute("ATTACH ':memory:' AS src;")
-
-        if init_schema:
-            schema = Path(f'{PATH}/bootstrap_sql/0_init.sql').read_text()
-            self.con.execute('USE src;')
-            self.con.execute(schema)
-        
-    
-    def set_branch_source(self, connect_sql, init_schema=False):
-        self.con.execute('DETACH DATABASE IF EXISTS brch;')
-
-        # The interpreter will use the src database in the case there is no brch
-        if connect_sql:
-            self.con.execute(connect_sql)
-
-            if init_schema:
-                schema = Path(f'{PATH}/bootstrap_sql/0_init.sql').read_text()
-                self.con.execute('USE brch;')
-                self.con.execute(schema)
-                self.con.execute('USE memory;')
-            
-            self.branch_source_exists = True
-        
-        else:
-            self.branch_source_exists = False
-
 
     def execute(self, query):
         variables = self.config
         variables['branch_source_exists'] = self.branch_source_exists
-
-        print('branch_exists:', self.branch_source_exists)
+        variables['events_source_exists'] = self.events_source_exists
+        variables['events_source_local'] = self.events_source_local
 
         resolved_query = self.interpreter.exec(variables, query)
         return self.con.execute(resolved_query)

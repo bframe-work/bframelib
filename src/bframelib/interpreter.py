@@ -65,8 +65,8 @@ class Interpreter:
         '_product_filters': Path(f'{PATH}/client_sql/_product_filters.sql').read_text(),
     }
 
+    # Remove comments
     def comment_replacement(self, query: str):
-        # Remove comments
         # TODO we need to handle comments inside of the views
         # Also comments at the end of the file are fully breaking (need a return at the end of the file)
         return sqlparse.format(query, strip_comments=True).strip()
@@ -89,8 +89,6 @@ class Interpreter:
                 new_query = re.sub(full_match.group(), str(vars.get('env_id')), new_query)
             case 'SYSTEM_DT':
                 new_query = re.sub(full_match.group(), f"'{vars.get('system_dt')}'", new_query)
-            case 'EVENT_SOURCE':
-                new_query = re.sub(full_match.group(), str(vars.get('events_source')), new_query)
             case 'RATING_AS_OF_DT':
                 new_query = re.sub(full_match.group(), f"'{vars.get('rating_as_of_dt')}'", new_query)
             case 'DEDUP_BRANCH_EVENTS':
@@ -110,6 +108,16 @@ class Interpreter:
             case 'BRANCH_SOURCE_EXIST':
                 exists = 'false'
                 if vars.get('branch_source_exists'):
+                    exists = 'true'
+                new_query = re.sub(full_match.group(), exists, new_query)
+            case 'EVENTS_SOURCE_EXIST':
+                exists = 'false'
+                if vars.get('events_source_exists'):
+                    exists = 'true'
+                new_query = re.sub(full_match.group(), exists, new_query)
+            case 'EVENTS_SOURCE_LOCAL':
+                exists = 'false'
+                if vars.get('events_source_local'):
                     exists = 'true'
                 new_query = re.sub(full_match.group(), exists, new_query)
             case _:

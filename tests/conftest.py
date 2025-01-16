@@ -3,7 +3,7 @@ import time
 import pytest
 import duckdb
 from pathlib import Path
-from bframelib import Client
+from bframelib import Client, Source
 from utils import standard_duckdb_client
 
 @pytest.fixture(scope="session")
@@ -30,8 +30,9 @@ def postgres_client():
         SET pg_experimental_filter_pushdown = true;
     """
 
+    sources = [Source('core', core_source_connect, True)]
     connection = duckdb.connect()
-    c = Client(config, init_core_schema=True, core_source_connect=core_source_connect, con=connection)
+    c = Client(config, sources, connection)
     seed = Path('./tests/fixtures/1_seed.sql').read_text()
     c.execute(seed)
     yield (c, config)
@@ -53,4 +54,5 @@ def client(request: pytest.FixtureRequest, duckdb_client: tuple[Client, dict[str
     yield c
     c.execute("ROLLBACK;")
     c.set_config(a)
-    c.set_branch_source(None)
+    c.set_source(Source('branch', '', False))
+    c.set_source(Source('events', '', False))

@@ -1,4 +1,4 @@
-from bframelib import Client
+from bframelib import Client, Source, DEFAULT_SOURCES
 from utils import standard_duckdb_client
 
 class TestBframeClient:
@@ -8,16 +8,13 @@ class TestBframeClient:
             'env_id': 1,
             'branch_id': 1
         }
-        c = Client(config, init_core_schema=True)
-
-        print(c.config)
+        c = Client(config)
         
         assert c.config['system_dt'] != None
         assert c.config['rating_as_of_dt'] != None
         assert c.config['contract_ids'] == []
         assert c.config['rating_range'] == []
         assert c.config['dedup_branch_events'] == False
-        assert c.config['events_source'] == 'src.events'
     
     def test_client_init(self):
         config = {
@@ -27,10 +24,10 @@ class TestBframeClient:
             'rating_range': ['1900-01-01', '2200-01-01'],
             'contract_ids': []
         }
-        c = Client(config, init_core_schema=True)
+        c = Client(config)
         
         res = c.execute('SELECT * FROM bframe.customers')
-        print(c.config)
+
         assert res.fetchone() == None
     
     def test_client_init_missing_required_fields(self):
@@ -40,7 +37,7 @@ class TestBframeClient:
         }
         
         try:
-            Client(config, init_core_schema=True)
+            Client(config)
         except:
             assert True
         else:
@@ -53,7 +50,7 @@ class TestBframeClient:
         
 
         try:
-            Client(config, init_core_schema=True)
+            Client(config)
         except:
             assert True
         else:
@@ -66,7 +63,7 @@ class TestBframeClient:
         
 
         try:
-            Client(config, init_core_schema=True)
+            Client(config)
         except:
             assert True
         else:
@@ -97,9 +94,13 @@ class TestBframeClient:
             assert False
     
     def test_client_init_remote_branch(self):
+        branch_source_connect = "ATTACH ':memory:' AS brch;"
         client, _ = standard_duckdb_client(
-            branch_id=2,
-            branch_source_connect="ATTACH ':memory:' AS brch;"
+            {'branch_id': 2},
+            [
+                DEFAULT_SOURCES[0],
+                Source('branch', branch_source_connect, True)
+            ],
         )
 
         # Check that queries work
@@ -119,7 +120,8 @@ class TestBframeClient:
             'branch_id': 2,
         })
 
-        client.set_branch_source("ATTACH ':memory:' AS brch;", True)
+        branch_source_connect = "ATTACH ':memory:' AS brch;"
+        client.set_source(Source('branch', branch_source_connect, True))
 
         # Check that queries work
         res = client.execute("SELECT * FROM bframe.contracts WHERE durable_id = '88'")
@@ -139,7 +141,8 @@ class TestBframeClient:
         })
 
         # The normal amount of invoices
-        client.set_branch_source("ATTACH ':memory:' AS brch;", True)
+        branch_source_connect = "ATTACH ':memory:' AS brch;"
+        client.set_source(Source('branch', branch_source_connect, True))
         res = client.execute("SELECT * FROM bframe.invoices WHERE contract_id = '88';")
         invoices = res.df().to_dict('records')
         assert len(invoices) == 13
@@ -151,4 +154,36 @@ class TestBframeClient:
         invoices = res.df().to_dict('records')
         assert len(invoices) == 7
 
+    def test_client_init_events(self, client: Client):
+        # org_id,env_id,branch_id,transaction_id,customer_id,properties,metered_at,received_at,customer_alias
 
+        events_source_connect = """
+            ATTACH ':memory:' AS evt;
+            CREATE VIEW IF NOT EXISTS evt.events AS (
+                SELECT *
+                FROM read_csv('tests/fixtures/event_source.csv', header=true, columns={
+                    'org_id': 'int64',
+                    'env_id': 'int64',
+                    'branch_id': 'int64',
+                    'transaction_id': 'varchar',
+                    'customer_id': 'varchar',
+                    'properties': 'json',
+                    'metered_at': 'timestamp',
+                    'received_at': 'timestamp',
+                    'customer_alias': 'varchar'
+                })
+            );
+        """
+        client.set_source(Source('events', events_source_connect, False))
+
+        # Check that there is data in the new event store
+        res = client.execute("SELECT * FROM bframe.events")
+        events = res.df().to_dict('records')
+
+        assert len(events) == 27
+
+        # Check that views respect the new event store
+        rated_events = client.execute("SELECT * FROM bframe.rated_events WHERE contract_id = '99'").df().to_dict('records')
+
+        # The 27 events included along with the 23 empty rated events for other periods
+        assert len(rated_events) == 50

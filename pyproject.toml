@@ -39,7 +39,7 @@ dev = [
 
 [project.urls]
 Homepage = "https://bframe.work"
-Source = "https://github.com/amaxwellblair/bframelib"
+Source = "https://github.com/bframe-work/bframelib"
 
 [tool.bumpver]
 current_version = "0.1.3"

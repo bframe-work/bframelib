@@ -167,4 +167,4 @@ Void
 
 [Documentation site](https://bframe.work)
 
-[Github repository](https://github.com/amaxwellblair/bframelib)
+[Github repository](https://github.com/bframe-work/bframelib)

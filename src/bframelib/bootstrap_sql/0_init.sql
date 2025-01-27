@@ -1,3 +1,5 @@
+SET TimeZone='UTC';
+
 CREATE TABLE IF NOT EXISTS organizations (
     id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT now(),

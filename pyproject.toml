@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bframelib"
-version = "0.1.4"
+version = "0.1.1"
 description = "An open source billing framework to generate, view and diff invoices locally."
 readme = "README.md"
 authors = [{ name = "Allan Blair", email = "allan@bframe.work" }]
@@ -29,7 +29,6 @@ requires-python = ">=3.9"
 [project.optional-dependencies]
 dev = [
     "black",
-    "bumpver",
     "isort",
     "pip-tools",
     "pytest",
@@ -41,24 +40,4 @@ dev = [
 Homepage = "https://bframe.work"
 Source = "https://github.com/bframe-work/bframelib"
 
-[tool.bumpver]
-current_version = "0.1.3"
-version_pattern = "MAJOR.MINOR.PATCH"
-commit_message = "bump version {old_version} -> {new_version}"
-tag_message = "{new_version}"
-tag_scope = "default"
-pre_commit_hook = ""
-post_commit_hook = ""
-commit = true
-tag = true
-push = true
-
-[tool.bumpver.file_patterns]
-"pyproject.toml" = [
-    'current_version = "{version}"',
-]
-"README.md" = [
-    "{version}",
-    "{pep440_version}",
-]
 

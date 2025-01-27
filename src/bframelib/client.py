@@ -43,6 +43,8 @@ class Client():
             'rating_as_of_dt': datetime.datetime.now().isoformat(),
             'rating_range': [],
             'contract_ids': [],
+            'customer_ids': [],
+            'product_uids': [],
             'dedup_branch_events': False
         }
         self.set_config(config)

@@ -14,6 +14,6 @@ SELECT
         THEN 'FINALIZED'
         ELSE 'DRAFT' 
     END) AS status,
-    SUM(COALESCE(li.amount, 0.0)) as total
+    round(SUM(COALESCE(li.amount, 0.0)), 2) as total
 FROM bframe.line_items AS li
 GROUP BY ALL

@@ -165,6 +165,6 @@ Void
 
 ## Resources
 
-[Documentation site](https://bframe.work)
+[Documentation](https://bframe.work)
 
 [Github repository](https://github.com/bframe-work/bframelib)

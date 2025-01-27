@@ -6,10 +6,14 @@ from pathlib import Path
 from jinja2 import Template
 
 
-def format_array(array: list[str]):
+def format_array(array: list[str], is_str: bool):
     if (array):
-        json_array = json.dumps(array)
-        return re.sub('"', "'", json_array)
+        if (is_str):
+            str_items = "', '".join(array)
+            return f"['{str_items}']"
+        else:
+            str_items = ", ".join(array)
+            return f"[{str_items}]"
     
     return '[]'
 
@@ -104,7 +108,11 @@ class Interpreter:
                     rating_range_end = f"'{vars.get('rating_range')[1]}'"
                 new_query = re.sub(full_match.group(), rating_range_end, new_query)
             case 'CONTRACT_IDS':
-                new_query = re.sub(full_match.group(), format_array(vars.get('contract_ids')), new_query)
+                new_query = re.sub(full_match.group(), format_array(vars.get('contract_ids'), True), new_query)
+            case 'CUSTOMER_IDS':
+                new_query = re.sub(full_match.group(), format_array(vars.get('customer_ids'), True), new_query)
+            case 'PRODUCT_UIDS':
+                new_query = re.sub(full_match.group(), format_array(vars.get('product_uids'), False), new_query)
             case 'BRANCH_SOURCE_EXIST':
                 exists = 'false'
                 if vars.get('branch_source_exists'):

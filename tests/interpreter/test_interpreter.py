@@ -29,3 +29,14 @@ class TestInterpreter:
         client.interpreter.add_table_template('test_table', 'SELECT 1 AS one, 2 AS two')
         res = client.execute('SELECT one, two FROM bframe.test_table;')
         assert res.fetchone() == (1, 2)
+
+    def test_unicode_in_contract_ids(self, client: Client):
+        contract_id = 'André Verheye_contract'
+        client.set_config({'contract_ids': [contract_id]})
+        try:
+            client.execute(f"SELECT * FROM bframe.contracts WHERE durable_id = '{contract_id}';")
+            assert True
+        except Exception as e:
+            print(e)
+            assert False
+        

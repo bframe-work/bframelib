@@ -10,6 +10,7 @@ FROM (
         FROM bframe._raw_customers
     ) AS raw
 )
+WHERE rank = 1
 {% else %}
 SELECT * EXCLUDE(rank)
 FROM (

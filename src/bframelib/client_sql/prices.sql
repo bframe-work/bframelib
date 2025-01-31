@@ -6,12 +6,12 @@ SELECT
     COALESCE(cp.invoice_schedule, lp.invoice_schedule, pb.invoice_schedule) AS invoice_schedule,
     COALESCE(
         cp.started_at,
-        date_trunc('month', c.started_at + to_months(COALESCE(cp.start_period, lp.start_period))),
+        date_trunc('month', c.started_at + to_months(COALESCE(cp.start_period, lp.start_period)::INTEGER)),
         c.started_at
     ) AS started_at,
     COALESCE(
         cp.ended_at,
-        date_trunc('month', c.started_at + to_months(COALESCE(cp.end_period, lp.end_period))),
+        date_trunc('month', c.started_at + to_months(COALESCE(cp.end_period, lp.end_period)::INTEGER)),
         c.ended_at
     ) AS ended_at,
     pb.effective_at,
@@ -54,12 +54,12 @@ SELECT
     cp.invoice_schedule,
     COALESCE(
         cp.started_at,
-        date_trunc('month', c.started_at + to_months(cp.start_period)),
+        date_trunc('month', c.started_at + to_months(cp.start_period::INTEGER)),
         c.started_at
     ) AS started_at,
     COALESCE(
         cp.ended_at,
-        date_trunc('month', c.started_at + to_months(cp.end_period)),
+        date_trunc('month', c.started_at + to_months(cp.end_period::INTEGER)),
         c.ended_at
     ) AS ended_at,
     -- These are null, because price_spans assumes that these effective dates come

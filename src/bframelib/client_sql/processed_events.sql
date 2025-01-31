@@ -8,7 +8,7 @@ LEFT JOIN (
         SELECT
             c.id,
             ci.value AS alias
-        FROM bframe.customers AS c, UNNEST(c.ingest_aliases) AS ci(value)
+        FROM bframe.customers AS c, UNNEST(json_extract_string(c.ingest_aliases, '$[*]')) AS ci(value)
         GROUP BY 1, 2
     ) AS cia ON cia.id = c.id
 ) AS c ON (

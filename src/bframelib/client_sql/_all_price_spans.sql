@@ -4,7 +4,7 @@ SELECT
         WHEN p.invoice_delivery = 'ONE_TIME'
         THEN p.ended_at
         ELSE LEAST(
-            DATE_TRUNC('month', d.month_start + TO_MONTHS(p.invoice_schedule)),
+            DATE_TRUNC('month', d.month_start + TO_MONTHS(p.invoice_schedule::INTEGER)),
             p.ended_at
         ) 
     END) as ended_at,
@@ -14,19 +14,19 @@ SELECT
         THEN p.ended_at -- Matches ended_at
         WHEN p.invoice_delivery = 'ADVANCED'
         THEN LEAST(
-            DATE_TRUNC('month',  d.month_start + TO_MONTHS(p.invoice_schedule)),
+            DATE_TRUNC('month',  d.month_start + TO_MONTHS(p.invoice_schedule::INTEGER)),
             p.ended_at
         ) -- Matches ended_at. An advanced charge can not be edited or SCD'd. Why? Because you charge it up front. Once you collect funds on it you can not edit it further
         ELSE LEAST(
             COALESCE(c.ineffective_at, p.ended_at),
-            DATE_TRUNC('month', d.month_start + TO_MONTHS(p.invoice_schedule))
+            DATE_TRUNC('month', d.month_start + TO_MONTHS(p.invoice_schedule::INTEGER))
         ) -- ARREARS case using ineffective periods
     END) as ineffective_at,
     d.month_start as proration_start, -- we only care about full months for proration starts
     (CASE
         WHEN p.invoice_delivery = 'ONE_TIME'
         THEN p.ended_at -- Matches ended_at
-        ELSE DATE_TRUNC('month', d.month_start + TO_MONTHS(p.invoice_schedule))
+        ELSE DATE_TRUNC('month', d.month_start + TO_MONTHS(p.invoice_schedule::INTEGER))
     END) as proration_end,
     p.price,
     p.pricing_metadata,
@@ -61,6 +61,6 @@ JOIN src.dates AS d
             ) = 0
         ) OR (
             p.invoice_delivery = 'ONE_TIME'
-            AND DATE_TRUNC('month', p.started_at + TO_MONTHS(p.invoice_schedule)) = d.month_start -- align one time invoice with the period selected
+            AND DATE_TRUNC('month', p.started_at + TO_MONTHS(p.invoice_schedule::INTEGER)) = d.month_start -- align one time invoice with the period selected
         )
     )

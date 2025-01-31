@@ -7,7 +7,7 @@ INSERT INTO src.branches (id, org_id, env_id, name) values (3, 1, 1, 'branch_2')
 
 -- CUSTOMERS --
 -- main --
-INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name, ingest_aliases) values (1, 1, 1, 1, '10', 'Bagel Corp', ARRAY['holy_bread', 'carb_wheels', 'bfast_brisbee']);
+INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name, ingest_aliases) values (1, 1, 1, 1, '10', 'Bagel Corp', '["holy_bread", "carb_wheels", "bfast_brisbee"]');
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) values (1, 1, 1, 2, '20', 'Rack City');
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name, version) values (1, 1, 1, 2, '20', 'Crack city', 1);
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) values (1, 1, 1, 3, '30', 'Panda Town');
@@ -16,10 +16,10 @@ INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) valu
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) values (1, 1, 1, 6, '60', 'Enterprise sally');
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) values (1, 1, 1, 7, '70', '3 is a crowd');
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) values (1, 1, 1, 8, '80', 'Rampelstiltskin');
-INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, effective_at, ineffective_at, name, ingest_aliases) values (1, 1, 1, 9, '90', '2023-01-01T0:00:00+00:00', '2023-12-01T0:00:00+00:00', 'Quick draw', ARRAY['first_bullet', 'second_bullet']);
-INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, effective_at, ineffective_at, name, ingest_aliases) values (1, 1, 1, 10, '90','2023-12-01T0:00:00+00:00', '2023-12-10T0:00:00+00:00', 'Quick draw', ARRAY['first_bullet', 'second_bullet', 'third_bullet']);
-INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, effective_at, ineffective_at, name, ingest_aliases) values (1, 1, 1, 11, '90', '2023-12-10T0:00:00+00:00', '2023-12-20T0:00:00+00:00', 'Quick draw', ARRAY['second_bullet', 'third_bullet']);
-INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, effective_at, name, ingest_aliases) values (1, 1, 1, 12, '90', '2023-12-20T0:00:00+00:00', 'Quick draw', ARRAY['third_bullet']);
+INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, effective_at, ineffective_at, name, ingest_aliases) values (1, 1, 1, 9, '90', '2023-01-01T0:00:00+00:00', '2023-12-01T0:00:00+00:00', 'Quick draw', '["first_bullet", "second_bullet"]');
+INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, effective_at, ineffective_at, name, ingest_aliases) values (1, 1, 1, 10, '90','2023-12-01T0:00:00+00:00', '2023-12-10T0:00:00+00:00', 'Quick draw', '["first_bullet", "second_bullet", "third_bullet"]');
+INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, effective_at, ineffective_at, name, ingest_aliases) values (1, 1, 1, 11, '90', '2023-12-10T0:00:00+00:00', '2023-12-20T0:00:00+00:00', 'Quick draw', '["second_bullet", "third_bullet"]');
+INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, effective_at, name, ingest_aliases) values (1, 1, 1, 12, '90', '2023-12-20T0:00:00+00:00', 'Quick draw', '["third_bullet"]');
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) values (1, 1, 1, 13, '100', 'PB&J');
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) values (1, 1, 1, 14, '110', 'Long boy');
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) values (1, 1, 1, 15, '120', 'No pricebook');

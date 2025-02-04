@@ -36,6 +36,8 @@ def sqlite_client():
         'system_dt': '2025-12-31',
         'rating_range': ['1900-01-01', '2200-01-01'],
         'contract_ids': [],
+        'customer_ids': [],
+        'product_uids': [],
     }
 
     core_source_connect = f"""
@@ -65,6 +67,8 @@ def postgres_client():
         'system_dt': '2025-12-31',
         'rating_range': ['1900-01-01', '2200-01-01'],
         'contract_ids': [],
+        'customer_ids': [],
+        'product_uids': [],
     }
 
     core_source_connect = """

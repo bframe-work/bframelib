@@ -28,6 +28,7 @@ INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) valu
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) values (1, 1, 1, 18, '150', 'updated filter logic');
 -- branch_1 --
 INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name, version) values (1, 1, 2, 2, '20', 'Stack City', 2);
+INSERT INTO src.customers (org_id, env_id, branch_id, id, durable_id, name) values (1, 1, 2, 19, '160', 'Branch 2 Customer');
 
 -- EVENTS --
 -- Customer 1
@@ -104,6 +105,7 @@ INSERT INTO src.products (org_id, env_id, branch_id, id, name, ptype) values (1,
 INSERT INTO src.products (org_id, env_id, branch_id, id, name, ptype) values (1, 1, 1, 5, 'Dup product', 'FIXED');
 INSERT INTO src.products (org_id, env_id, branch_id, id, name, ptype, version) values (1, 1, 1, 5, 'Dup product', 'FAKE', 1);
 INSERT INTO src.products (org_id, env_id, branch_id, id, name, ptype, filters, event_name) values (1, 1, 1, 6, 'CPU usage', 'EVENT', '{"filter_1": {"path": "$.region", "_in": [], "not_in": ["test-region"], "optional": true}, "filter_2": {"path": "$.service", "_in": ["sqs"], "not_in": [], "optional": false}}', 'api_call');
+INSERT INTO src.products (org_id, env_id, branch_id, id, name, ptype) values (1, 1, 2, 7, 'Separate branch: Platform fee', 'FIXED');
 
 -- PRICEBOOKS --
 INSERT INTO src.pricebooks (org_id, env_id, branch_id, id, durable_id, name, invoice_delivery, invoice_schedule) values (1, 1, 1, 1, '10', 'test1', 'ARREARS', 1);
@@ -193,6 +195,8 @@ INSERT INTO src.contracts (org_id, env_id, branch_id, effective_at, id, durable_
 INSERT INTO src.contracts (org_id, env_id, branch_id, effective_at, id, durable_id, customer_id, started_at, ended_at) values (1, 1, 1, '2023-01-01', 21, '240', '140', '2023-01-01', NULL);
 -- filter tests
 INSERT INTO src.contracts (org_id, env_id, branch_id, effective_at, id, durable_id, customer_id, started_at, ended_at) values (1, 1, 1, '2023-01-01', 22, '250', '150', '2023-01-01', '2024-01-01');
+-- branch 2 contract
+INSERT INTO src.contracts (org_id, env_id, branch_id, effective_at, id, durable_id, customer_id, pricebook_id, started_at, ended_at) values (1, 1, 2, '2023-01-01', 23, '260', '160', '10', '2023-01-01', '2024-01-01');
 
 -- CONTRACT PRICES --
 -- Contract 8

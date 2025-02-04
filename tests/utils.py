@@ -25,6 +25,8 @@ def standard_duckdb_client(config: dict = {}, sources = DEFAULT_SOURCES, connect
     config['system_dt'] = config.get('system_dt', '2025-12-31')
     config['rating_range'] = config.get('rating_range', ['1900-01-01', '2200-01-01'])
     config['contract_ids'] = config.get('contract_ids', [])
+    config['customer_ids'] = config.get('customer_ids', [])
+    config['product_uids'] = config.get('product_uids', [])
     
     connection = duckdb.connect()
     c = Client(config, sources, connection)

@@ -39,4 +39,96 @@ class TestInterpreter:
         except Exception as e:
             print(e)
             assert False
+
+    def test_contract_id_filter(self, client: Client):
+        client.set_config({'contract_ids': ['130']})
+        res = client.execute(f"SELECT * FROM bframe.contracts;")
+        
+        contracts = res.fetchdf().to_dict('records')
+
+        # Ensure only gets contracts associated with the durable key set
+        assert len(contracts) == 1
+        assert contracts[0]['durable_id'] == '130'
+
+        client.set_config({
+            'contract_ids': [],
+            'customer_ids': [contracts[0]['customer_id']]
+        })
+
+        res = client.execute(f"SELECT * FROM bframe.contracts;")
+        
+        contracts = res.fetchdf().to_dict('records')
+
+        # Ensure only gets contracts associated with the customer id are pulled
+        assert len(contracts) == 1
+        assert contracts[0]['durable_id'] == '130'
+
+        client.set_config({
+            'branch_id': 2,
+        })
+
+        res = client.execute(f"SELECT * FROM bframe.contracts;")
+        
+        contracts = res.fetchdf().to_dict('records')
+
+        # Ensure only gets contracts associated with the customer id are pulled, even on a different branch
+        assert len(contracts) == 1
+        assert contracts[0]['durable_id'] == '130'
+
+    def test_customer_id_filter(self, client: Client):
+        client.set_config({'customer_ids': ['30']})
+        res = client.execute(f"SELECT * FROM bframe.customers;")
+        
+        customers = res.fetchdf().to_dict('records')
+
+        # Ensure only gets customers associated with the durable key set
+        assert len(customers) == 1
+        assert customers[0]['durable_id'] == '30'
+
+        res = client.execute(f"SELECT * FROM bframe.events;")
+        
+        events = res.fetchdf().to_dict('records')
+
+        # Ensure only gets events associated with the customer
+        assert len(events) == 2
+        assert events[0]['customer_id'] == '30'
+        assert events[1]['customer_id'] == '30'
+
+        client.set_config({
+            'branch_id': 2,
+        })
+
+        res = client.execute(f"SELECT * FROM bframe.customers;")
+        
+        customers = res.fetchdf().to_dict('records')
+
+        # Ensure only gets customers associated with the customer id are pulled, even on a different branch
+        assert len(customers) == 1
+        assert customers[0]['durable_id'] == '30'
+
+    def test_product_id_filter(self, client: Client):
+        client.set_config({'product_uids': ['1']})
+        res = client.execute(f"SELECT * FROM bframe.products;")
+        
+        products = res.fetchdf().to_dict('records')
+
+        # Ensure only gets products associated with the id set
+        assert len(products) == 1
+        assert products[0]['id'] == 1
+
+        client.set_config({
+            'branch_id': 2,
+        })
+
+        res = client.execute(f"SELECT * FROM bframe.products;")
+        
+        products = res.fetchdf().to_dict('records')
+
+        # Ensure local products are also filtered
+        assert len(products) == 1
+        assert products[0]['id'] == 1
+
+    
+
+
         

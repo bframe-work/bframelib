@@ -7,3 +7,6 @@ WHERE org_id = _BF_ORG_ID
 {% if _BF_CONTRACT_IDS|length > 0 %}
     AND durable_id IN _BF_CONTRACT_IDS
 {% endif %}
+{% if _BF_CUSTOMER_IDS|length > 0 %}
+    AND customer_id IN _BF_CUSTOMER_IDS
+{% endif %}

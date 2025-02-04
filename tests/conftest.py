@@ -74,11 +74,22 @@ def postgres_client():
 
     sources = [Source('core', core_source_connect, True)]
     connection = duckdb.connect()
-    c = Client(config, sources, connection)
+
+    pg_client_online = False
+    attempts = 0
+    while(not pg_client_online and attempts < 3):
+        try:
+            c = Client(config, sources, connection)        
+        except Exception:
+            attempts = attempts + 1
+            time.sleep(1)
+
+
+    
     seed = Path('./tests/fixtures/1_seed.sql').read_text()
     c.execute(seed)
     yield SourceClient(c, config)
-    subprocess.run("docker compose -f tests/postgres/docker-compose.yml down", shell=True)
+    subprocess.run("docker compose -f ./tests/postgres/docker-compose.yml down", shell=True)
 
 @pytest.fixture(autouse=True, params=['duckdb', 'postgres', 'sqlite'])
 def client(request: pytest.FixtureRequest, duckdb_client: SourceClient, postgres_client: SourceClient, sqlite_client: SourceClient):

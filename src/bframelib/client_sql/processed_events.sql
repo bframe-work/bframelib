@@ -13,6 +13,6 @@ LEFT JOIN (
     ) AS cia ON cia.id = c.id
 ) AS c ON (
     c.alias = e.customer_alias
-    AND e.metered_at >= c.effective_at
-    AND e.metered_at < c.ineffective_at
+    AND (e.metered_at >= c.effective_at OR c.effective_at IS NULL)
+    AND (e.metered_at < c.ineffective_at OR c.ineffective_at IS NULL)
 )

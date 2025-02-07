@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS branches (
     name TEXT NOT NULL,
     org_id INTEGER,
     env_id INTEGER,
+    archived_at TIMESTAMP,
     UNIQUE (id, org_id, env_id)
 );
 
@@ -147,7 +148,7 @@ CREATE TABLE IF NOT EXISTS contract_prices (
     started_at TIMESTAMP,
     ended_at TIMESTAMP,
     fixed_quantity DECIMAL,
-    prorate BOOLEAN,
+    prorate BOOLEAN NOT NULL DEFAULT FALSE,
     product_uid INTEGER,
     list_price_uid INTEGER,
     contract_uid INTEGER,

@@ -4,6 +4,7 @@ INSERT INTO src.environments (id, org_id, name) values (1, 1, 'PROD');
 INSERT INTO src.branches (id, org_id, env_id, name) values (1, 1, 1, 'main');
 INSERT INTO src.branches (id, org_id, env_id, name) values (2, 1, 1, 'branch_1');
 INSERT INTO src.branches (id, org_id, env_id, name) values (3, 1, 1, 'branch_2');
+INSERT INTO src.branches (id, org_id, env_id, archived_at, name) values (4, 1, 1, '2025-01-01', 'archived');
 
 -- CUSTOMERS --
 -- main --

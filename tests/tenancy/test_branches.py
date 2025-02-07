@@ -13,4 +13,11 @@ class TestBranches:
         assert len(branches) == 1
         assert branches[0]['name'] == 'main'
 
+    def test_branch_archived(self, client: Client):
+        res = client.execute(f"SELECT * FROM bframe.branches WHERE id = 4;")
+
+        branch = res.fetchone()
+        assert branch == None
+
+
     

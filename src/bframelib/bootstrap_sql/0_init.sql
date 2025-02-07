@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS branches (
     org_id INTEGER,
     env_id INTEGER,
     archived_at TIMESTAMP,
-    UNIQUE (id, org_id, env_id)
+    version INTEGER NOT NULL DEFAULT 0,
+    UNIQUE (id, version, org_id, env_id)
 );
 
 CREATE TABLE IF NOT EXISTS customers (

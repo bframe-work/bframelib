@@ -32,6 +32,7 @@ class Interpreter:
         self._table_templates[name] = template
 
     _table_templates = {
+        '_raw_branches': Path(f'{PATH}/client_sql/_raw_branches.sql').read_text(),
         '_raw_products': Path(f'{PATH}/client_sql/_raw_products.sql').read_text(),
         '_local_products': Path(f'{PATH}/client_sql/_local_products.sql').read_text(),
         'products': Path(f'{PATH}/client_sql/products.sql').read_text(),

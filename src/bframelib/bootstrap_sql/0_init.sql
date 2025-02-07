@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS customers (
     name TEXT NOT NULL,
     archived_at TIMESTAMP,
     version INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (id, version, org_id, env_id)
+    PRIMARY KEY (id, version, org_id, env_id, branch_id)
 );
 
 CREATE TABLE IF NOT EXISTS events (
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS products (
     agg_property TEXT,
     archived_at TIMESTAMP,
     version INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (id, version, org_id, env_id),
+    PRIMARY KEY (id, version, org_id, env_id, branch_id),
     CHECK (ptype <> 'FIXED' OR (ptype = 'FIXED' AND filters IS NULL AND agg_property IS NULL AND event_name IS NULL))
 );
 
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS pricebooks (
     ineffective_at TIMESTAMP,
     archived_at TIMESTAMP,
     version INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (id, version, org_id, env_id)
+    PRIMARY KEY (id, version, org_id, env_id, branch_id)
 );
 
 CREATE TABLE IF NOT EXISTS contracts (
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS contracts (
     effective_at TIMESTAMP NOT NULL,
     ineffective_at TIMESTAMP,
     version INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (id, version, org_id, env_id),
+    PRIMARY KEY (id, version, org_id, env_id, branch_id),
     UNIQUE (durable_id, effective_at, version),
     CHECK ((void AND voided_at IS NOT NULL) OR (NOT void AND voided_at IS NULL)),
     CHECK (started_at < ended_at),
@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS list_prices (
     pricebook_uid INTEGER,
     pricing_metadata JSON,
     version INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (id, version, org_id, env_id)
+    PRIMARY KEY (id, version, org_id, env_id, branch_id)
 );
 
 CREATE TABLE IF NOT EXISTS contract_prices (
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS contract_prices (
     contract_uid INTEGER,
     pricing_metadata JSON,
     version INTEGER NOT NULL DEFAULT 0,
-    PRIMARY KEY (id, version, org_id, env_id),
+    PRIMARY KEY (id, version, org_id, env_id, branch_id),
     CHECK (COALESCE(list_price_uid, product_uid) IS NOT NULL)
 );
 

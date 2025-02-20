@@ -68,6 +68,7 @@ class Interpreter:
         'environments': Path(f'{PATH}/client_sql/environments.sql').read_text(),
         'organizations': Path(f'{PATH}/client_sql/organizations.sql').read_text(),
         '_product_filters': Path(f'{PATH}/client_sql/_product_filters.sql').read_text(),
+        'dates': Path(f'{PATH}/client_sql/dates.sql').read_text(),
     }
 
     # Remove comments

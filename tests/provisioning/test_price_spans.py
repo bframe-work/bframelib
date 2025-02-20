@@ -473,11 +473,11 @@ class TestPriceSpansDateRange:
     def test_specific_range(self, client: Client):
         client.set_config({'rating_range': ['2023-01-01', '2023-02-01']})
         min_date, max_date = client.get_price_span_date_range(('EVENT', 'FIXED'))
-        assert min_date == datetime.datetime(2022, 12, 1)
+        assert min_date == datetime.datetime(2023, 1, 1)
         assert max_date == datetime.datetime(2024, 1, 1)
     
     def test_specific_range_events(self, client: Client):
         client.set_config({'rating_range': ['2023-01-01', '2023-02-01']})
         min_date, max_date = client.get_price_span_date_range(('EVENT',))
-        assert min_date == datetime.datetime(2022, 12, 1)
+        assert min_date == datetime.datetime(2023, 1, 1)
         assert max_date == datetime.datetime(2023, 2, 1)

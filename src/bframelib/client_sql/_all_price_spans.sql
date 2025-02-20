@@ -43,7 +43,7 @@ SELECT
     c.customer_id
 FROM bframe.contracts AS c -- can probably get rid of this now since prices does all this work
 JOIN bframe.prices AS p ON p.contract_uid = c.id
-JOIN src.dates AS d
+JOIN bframe.dates AS d
     ON c.effective_at < (d.month_end + to_days(1)) -- effective date will always be larger than started so we will always use it if it exists
     AND (COALESCE(c.ineffective_at, p.ended_at) > d.month_start OR COALESCE(c.ineffective_at, p.ended_at) IS NULL)
     AND p.started_at < (d.month_end + to_days(1))

@@ -106,7 +106,7 @@ class TestInterpreter:
         assert len(customers) == 1
         assert customers[0]['durable_id'] == '30'
 
-    def test_product_id_filter(self, client: Client):
+    def test_product_uid_filter(self, client: Client):
         client.set_config({'product_uids': ['1']})
         res = client.execute(f"SELECT * FROM bframe.products;")
         
@@ -127,6 +127,16 @@ class TestInterpreter:
         # Ensure local products are also filtered
         assert len(products) == 1
         assert products[0]['id'] == 1
+    
+    def test_pricebook_id_filter(self, client: Client):
+        client.set_config({'pricebook_ids': ['20']})
+        res = client.execute(f"SELECT * FROM bframe.pricebooks;")
+        
+        pricebooks = res.fetchdf().to_dict('records')
+
+        # Ensure only gets pricebooks associated with the id set
+        assert len(pricebooks) == 1
+        assert pricebooks[0]['id'] == 2
 
     
 

@@ -38,6 +38,7 @@ def sqlite_client():
         'contract_ids': [],
         'customer_ids': [],
         'product_uids': [],
+        'pricebook_ids': [],
     }
 
     core_source_connect = f"""
@@ -69,6 +70,7 @@ def postgres_client():
         'contract_ids': [],
         'customer_ids': [],
         'product_uids': [],
+        'pricebook_ids': [],
     }
 
     core_source_connect = """

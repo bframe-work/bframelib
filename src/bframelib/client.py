@@ -45,6 +45,7 @@ class Client():
             'contract_ids': [],
             'customer_ids': [],
             'product_uids': [],
+            'pricebook_ids': [],
             'dedup_branch_events': False
         }
         self.set_config(config)

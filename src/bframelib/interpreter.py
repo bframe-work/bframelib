@@ -113,6 +113,8 @@ class Interpreter:
                 new_query = re.sub(full_match.group(), format_array(vars.get('contract_ids'), True), new_query)
             case 'CUSTOMER_IDS':
                 new_query = re.sub(full_match.group(), format_array(vars.get('customer_ids'), True), new_query)
+            case 'PRICEBOOK_IDS':
+                new_query = re.sub(full_match.group(), format_array(vars.get('pricebook_ids'), True), new_query)
             case 'PRODUCT_UIDS':
                 new_query = re.sub(full_match.group(), format_array(vars.get('product_uids'), False), new_query)
             case 'BRANCH_SOURCE_EXIST':

@@ -27,6 +27,7 @@ def standard_duckdb_client(config: dict = {}, sources = DEFAULT_SOURCES, connect
     config['contract_ids'] = config.get('contract_ids', [])
     config['customer_ids'] = config.get('customer_ids', [])
     config['product_uids'] = config.get('product_uids', [])
+    config['pricebook_ids'] = config.get('pricebook_ids', [])
     
     connection = duckdb.connect()
     c = Client(config, sources, connection)

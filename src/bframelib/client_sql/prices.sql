@@ -16,11 +16,16 @@ SELECT
     ) AS ended_at,
     pb.effective_at,
     pb.ineffective_at,
+    c.effective_at as c_effective_at,
+    c.ineffective_at as c_ineffective_at,
     COALESCE(cp.fixed_quantity, lp.fixed_quantity) as fixed_quantity,
     prod.ptype AS product_type,
     prod.id as product_uid,
     lp.pricebook_uid,
+    c.pricebook_id as pricebook_id,
     c.id as contract_uid,
+    c.durable_id as contract_id,
+    c.customer_id,
     COALESCE(cp.prorate, c.prorate, lp.prorate, pb.prorate) as prorate,
     COALESCE(cp.pricing_metadata, lp.pricing_metadata) as pricing_metadata
 FROM bframe.contracts AS c
@@ -46,6 +51,7 @@ LEFT JOIN bframe.contract_prices AS cp
 JOIN bframe.products AS prod ON prod.id = lp.product_uid
 WHERE c.void = FALSE
 UNION ALL
+-- This side of the union represents prices without a list price linked to it
 SELECT
     NULL as list_price_uid,
     cp.id as contract_price_uid,
@@ -66,11 +72,16 @@ SELECT
     -- from the pricebook not the contract... contract_prices have no pricebook hence it is NULL
     NULL as effective_at,
     NULL as ineffective_at,
+    c.effective_at as c_effective_at,
+    c.ineffective_at as c_ineffective_at,
     cp.fixed_quantity,
     prod.ptype AS product_type,
     prod.id as product_uid,
     NULL as pricebook_uid,
+    c.pricebook_id,
     c.id as contract_uid,
+    c.durable_id as contract_id,
+    c.customer_id,
     COALESCE(cp.prorate, c.prorate) as prorate,
     cp.pricing_metadata
 FROM bframe.contracts AS c

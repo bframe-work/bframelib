@@ -8,7 +8,7 @@ SELECT
             p.ended_at
         ) 
     END) as ended_at,
-    GREATEST(COALESCE(c.effective_at, p.started_at), d.month_start) as effective_at,
+    GREATEST(COALESCE(c_effective_at, p.started_at), d.month_start) as effective_at,
     (CASE
         WHEN p.invoice_delivery = 'ONE_TIME'
         THEN p.ended_at -- Matches ended_at
@@ -18,7 +18,7 @@ SELECT
             p.ended_at
         ) -- Matches ended_at. An advanced charge can not be edited or SCD'd. Why? Because you charge it up front. Once you collect funds on it you can not edit it further
         ELSE LEAST(
-            COALESCE(c.ineffective_at, p.ended_at),
+            COALESCE(p.c_ineffective_at, p.ended_at),
             DATE_TRUNC('month', d.month_start + TO_MONTHS(p.invoice_schedule::INTEGER))
         ) -- ARREARS case using ineffective periods
     END) as ineffective_at,
@@ -37,15 +37,14 @@ SELECT
     p.list_price_uid,
     p.contract_price_uid,
     p.product_uid,
-    c.pricebook_id,
-    c.durable_id AS contract_id,
-    c.id AS contract_uid,
-    c.customer_id
-FROM bframe.contracts AS c -- can probably get rid of this now since prices does all this work
-JOIN bframe.prices AS p ON p.contract_uid = c.id
+    p.pricebook_id,
+    p.contract_id,
+    p.contract_uid,
+    p.customer_id
+FROM bframe.prices AS p
 JOIN bframe.dates AS d
-    ON c.effective_at < (d.month_end + to_days(1)) -- effective date will always be larger than started so we will always use it if it exists
-    AND (COALESCE(c.ineffective_at, p.ended_at) > d.month_start OR COALESCE(c.ineffective_at, p.ended_at) IS NULL)
+    ON p.c_effective_at < (d.month_end + to_days(1)) -- effective date will always be larger than started so we will always use it if it exists
+    AND (COALESCE(p.c_ineffective_at, p.ended_at) > d.month_start OR COALESCE(p.c_ineffective_at, p.ended_at) IS NULL)
     AND p.started_at < (d.month_end + to_days(1))
     AND (p.ended_at > d.month_start OR p.ended_at IS NULL)
     -- always use the smaller ineffective date since it's an override

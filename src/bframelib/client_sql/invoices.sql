@@ -1,4 +1,5 @@
 SELECT
+    li.invoice_id as id,
     _BF_ORG_ID as org_id,
     _BF_ENV_ID as env_id,
     _BF_BRANCH_ID as branch_id,
@@ -15,5 +16,13 @@ SELECT
         ELSE 'DRAFT' 
     END) AS status,
     round(SUM(COALESCE(li.amount, 0.0)), 2) as total
-FROM bframe.line_items AS li
+FROM bframe._raw_line_items AS li
 GROUP BY ALL
+{% if _BF_READ_MODE == 'CURRENT' %}
+UNION ALL
+SELECT *
+FROM bframe._active_src_invoices
+UNION ALL
+SELECT *
+FROM bframe._historic_src_invoices
+{% endif %}

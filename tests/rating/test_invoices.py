@@ -4,7 +4,7 @@ from bframelib import Client
 
 class TestMainInvoices:
     def test_insert_invoices(self, client):
-        res = client.execute(f"INSERT INTO src.invoices BY NAME (SELECT '1' as id, * FROM bframe.invoices limit 1);")
+        res = client.execute(f"INSERT INTO src.invoices BY NAME (SELECT * FROM bframe.invoices limit 1);")
         assert res.fetchone() == (1,)
     
     def test_generic_invoices(self, client):

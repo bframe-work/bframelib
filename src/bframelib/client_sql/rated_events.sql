@@ -19,6 +19,8 @@ SELECT
     ps.ended_at,
     ps.effective_at,
     ps.ineffective_at,
+    ps.invoice_id,
+    ps.line_item_id,
     (CASE
         WHEN _BF_RATING_AS_OF_DT >= ps.ended_at
         THEN 'FINALIZED'

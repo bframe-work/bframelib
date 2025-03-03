@@ -1,7 +1,7 @@
 
 class TestLineItems:
     def test_insert_line_items(self, client):
-        res = client.execute(f"INSERT INTO src.line_items BY NAME (SELECT '1' as id, * FROM bframe.line_items as li limit 1);")
+        res = client.execute(f"INSERT INTO src.line_items BY NAME (SELECT * FROM bframe.line_items as li limit 1);")
         assert res.fetchone() == (1,)
 
     def test_generic_line_items(self, client):

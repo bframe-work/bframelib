@@ -28,6 +28,8 @@ def standard_duckdb_client(config: dict = {}, sources = DEFAULT_SOURCES, connect
     config['customer_ids'] = config.get('customer_ids', [])
     config['product_uids'] = config.get('product_uids', [])
     config['pricebook_ids'] = config.get('pricebook_ids', [])
+    config['read_mode'] = config.get('read_mode', 'VIRTUAL')
+
     
     connection = duckdb.connect()
     c = Client(config, sources, connection)

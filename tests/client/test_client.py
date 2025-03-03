@@ -93,6 +93,83 @@ class TestBframeClient:
         else:
             assert False
     
+    def test_client_set_config_set_rating_range_in_virtual(self, client: Client):
+        client.set_config({'rating_range': ['2023-01-01', '2023-02-01']})
+        
+        try:
+            client.set_config({'rating_range': []})
+        except:
+            assert True
+        else:
+            assert False
+
+        try:
+            client.set_config({'rating_range': None})
+        except:
+            assert True
+        else:
+            assert False
+
+        try:
+            client.set_config({'rating_range': 1})
+        except:
+            assert True
+        else:
+            assert False
+    
+    def test_client_set_config_set_forward_window_in_rolling(self, client: Client):
+        client.set_config({
+            'read_mode': 'CURRENT',
+            'forward_window': 1,
+        })
+        
+        try:
+            client.set_config({
+                'read_mode': 'CURRENT',
+                'forward_window': None,
+            })
+        except:
+            assert True
+        else:
+            assert False
+
+        try:
+            client.set_config({
+                'read_mode': 'CURRENT',
+                'forward_window': 'hello world',
+            })
+        except:
+            assert True
+        else:
+            assert False
+        
+    def test_client_set_config_set_lookback_window_in_rolling(self, client: Client):
+        client.set_config({
+            'read_mode': 'CURRENT',
+            'lookback_window': 1,
+        })
+        
+        try:
+            client.set_config({
+                'read_mode': 'CURRENT',
+                'lookback_window': None,
+            })
+        except:
+            assert True
+        else:
+            assert False
+
+        try:
+            client.set_config({
+                'read_mode': 'CURRENT',
+                'lookback_window': 'hello world',
+            })
+        except:
+            assert True
+        else:
+            assert False
+        
+    
     def test_client_init_remote_branch(self):
         branch_source_connect = "ATTACH ':memory:' AS brch;"
         client, _ = standard_duckdb_client(

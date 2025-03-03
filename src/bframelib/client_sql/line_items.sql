@@ -1,5 +1,10 @@
 SELECT *
-FROM bframe.fixed_line_items
-UNION -- This should be UNION ALL, but there is a bug in duckdb preventing this 11/8/2024
+FROM bframe._raw_line_items
+{% if _BF_READ_MODE == 'CURRENT' %}
+UNION
 SELECT *
-FROM bframe.event_line_items
+FROM bframe._active_src_line_items
+UNION ALL
+SELECT *
+FROM bframe._historic_src_line_items
+{% endif %}

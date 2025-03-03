@@ -480,4 +480,5 @@ class TestPriceSpansDateRange:
         client.set_config({'rating_range': ['2023-01-01', '2023-02-01']})
         min_date, max_date = client.get_price_span_date_range(('EVENT',))
         assert min_date == datetime.datetime(2023, 1, 1)
-        assert max_date == datetime.datetime(2023, 2, 1)
+        # Contract 21 has a 12 month contract price
+        assert max_date == datetime.datetime(2024, 1, 1)

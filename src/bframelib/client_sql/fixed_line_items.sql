@@ -1,4 +1,5 @@
 SELECT
+    ps.line_item_id as id,
     _BF_ORG_ID as org_id,
     _BF_ENV_ID as env_id,
     _BF_BRANCH_ID as branch_id,
@@ -12,6 +13,7 @@ SELECT
     ps.ended_at,
     ps.effective_at,
     ps.ineffective_at,
+    ps.invoice_id,
     (CASE
         WHEN ps.invoice_delivery = 'ARREARS' AND _BF_RATING_AS_OF_DT >= ps.ended_at
         THEN 'FINALIZED'

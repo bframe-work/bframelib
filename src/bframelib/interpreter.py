@@ -1,9 +1,10 @@
-import json
 import re
 import sqlparse
 from . import PATH
 from pathlib import Path
 from jinja2 import Template
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 
 def format_array(array: list[str], is_str: bool):
@@ -69,6 +70,11 @@ class Interpreter:
         'organizations': Path(f'{PATH}/client_sql/organizations.sql').read_text(),
         '_product_filters': Path(f'{PATH}/client_sql/_product_filters.sql').read_text(),
         'dates': Path(f'{PATH}/client_sql/dates.sql').read_text(),
+        '_historic_src_line_items': Path(f'{PATH}/client_sql/_historic_src_line_items.sql').read_text(),
+        '_historic_src_invoices': Path(f'{PATH}/client_sql/_historic_src_invoices.sql').read_text(),
+        '_active_src_line_items': Path(f'{PATH}/client_sql/_active_src_line_items.sql').read_text(),
+        '_active_src_invoices': Path(f'{PATH}/client_sql/_active_src_invoices.sql').read_text(),
+        '_raw_line_items': Path(f'{PATH}/client_sql/_raw_line_items.sql').read_text(),
     }
 
     # Remove comments
@@ -99,6 +105,16 @@ class Interpreter:
                 new_query = re.sub(full_match.group(), f"'{vars.get('rating_as_of_dt')}'", new_query)
             case 'DEDUP_BRANCH_EVENTS':
                 new_query = re.sub(full_match.group(), str(vars.get('dedup_branch_events')), new_query)
+            case 'READ_MODE':
+                new_query = re.sub(full_match.group(), f"'{vars.get('read_mode')}'", new_query)
+            case 'LOOKBACK_DT':
+                rating_as_of_dt = datetime.fromisoformat(vars.get('rating_as_of_dt'))
+                lookback_dt = rating_as_of_dt - relativedelta(months=vars.get('lookback_window'))
+                new_query = re.sub(full_match.group(), f"'{lookback_dt.isoformat()}'", new_query)
+            case 'FORWARD_DT':
+                rating_as_of_dt = datetime.fromisoformat(vars.get('rating_as_of_dt'))
+                forward_dt = rating_as_of_dt + relativedelta(months=vars.get('forward_window'))
+                new_query = re.sub(full_match.group(), f"'{forward_dt.isoformat()}'", new_query)
             case 'RATING_RANGE_START':
                 rating_range_start = "''"
                 if (len(vars.get('rating_range')) == 2):

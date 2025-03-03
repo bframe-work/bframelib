@@ -4,7 +4,7 @@ from typing import NamedTuple
 from pathlib import Path
 from . import interpreter, PATH
 
-REQUIRED_FIELDS = ['org_id', 'env_id', 'branch_id']
+REQUIRED_FIELDS = ['org_id', 'env_id', 'branch_id', 'read_mode', 'rating_as_of_dt']
 
 class Source(NamedTuple):
     src_type: str
@@ -46,7 +46,10 @@ class Client():
             'customer_ids': [],
             'product_uids': [],
             'pricebook_ids': [],
-            'dedup_branch_events': False
+            'dedup_branch_events': False,
+            'read_mode': 'CURRENT',
+            'lookback_window': 3,
+            'forward_window': 3,
         }
         self.set_config(config)
         
@@ -111,25 +114,47 @@ class Client():
             if key not in self._config:
                 raise Exception(f'Unknown fields can not be set: {key}')
         
-        # Update configuration with new values, maintaining defaults
-        for key, _ in self._config.items():
-            new_value = config_updates.get(key)
-            if key in config_updates:
-                if key in REQUIRED_FIELDS and new_value == None:
-                    raise Exception(f'Required field can not be set to None')
+        merged_config = self._config | config_updates
 
-                if key in ('branch_source_connect', 'core_source_connect'):
-                    self.con.execute(new_value)
+        # Check required fields        
+        for key, value in merged_config.items():
+            if key in REQUIRED_FIELDS and value == None:
+                raise Exception(f'Required field can not be set to None')
+        
+        # Check read_mode has been set correctly
+        if merged_config['read_mode'] in ('CURRENT', 'UNSAVED_CURRENT'):
+            forward_window = merged_config.get('forward_window', None)
+            lookback_window = merged_config.get('lookback_window', None)
 
-                self._config[key] = new_value
+            if not isinstance(forward_window, int):
+                raise Exception('`read_mode` CURRENT requires integer `forward_window`')
+            elif not isinstance(lookback_window, int):
+                raise Exception('`read_mode` CURRENT requires integer `lookback_window`')
+        elif merged_config['read_mode'] == 'VIRTUAL':
+            rating_range = merged_config.get('rating_range', None)
+            if not isinstance(rating_range, list) or len(rating_range) < 2:
+                raise Exception('`read_mode` VIRTUAL requires a valid `rating_range`')
+        else:
+            raise Exception('`read_mode` can only be set to "CURRENT" or "VIRTUAL"')
+                
+        
+        # Since validation looks good update source connects
+        if 'branch_source_connect' in config_updates:
+            self.con.execute(config_updates.get('branch_source_connect'))
 
-    def execute(self, query):
+        if 'core_source_connect' in config_updates:
+            self.con.execute(config_updates.get('core_source_connect'))
+
+        # Set the merged config
+        self._config = merged_config
+
+    def execute(self, query: str, verbose: bool = False):
         variables = self.config
         variables['branch_source_exists'] = self.branch_source_exists
         variables['events_source_exists'] = self.events_source_exists
         variables['events_source_local'] = self.events_source_local
 
-        resolved_query = self.interpreter.exec(variables, query)
+        resolved_query = self.interpreter.exec(variables, query, verbose)
         return self.con.execute(resolved_query)
 
     def get_price_span_date_range(self, product_types: tuple): 
@@ -140,3 +165,6 @@ class Client():
             WHERE product_type IN {str(product_types)}
         """).fetchone()
 
+# TODO:
+# Test virtual mode must have a range
+# Test standard mode must have a lookback / forward window

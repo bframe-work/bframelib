@@ -1,4 +1,5 @@
 SELECT
+    re.line_item_id as id,
     _BF_ORG_ID as org_id,
     _BF_ENV_ID as env_id,
     _BF_BRANCH_ID as branch_id,
@@ -12,6 +13,7 @@ SELECT
     re.ended_at,
     re.effective_at,
     re.ineffective_at,
+    re.invoice_id,
     (CASE
         WHEN _BF_RATING_AS_OF_DT >= re.ended_at
         THEN 'FINALIZED'

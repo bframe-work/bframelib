@@ -16,13 +16,10 @@ SELECT
         ELSE 'DRAFT' 
     END) AS status,
     round(SUM(COALESCE(li.amount, 0.0)), 2) as total
-FROM bframe._raw_line_items AS li
+FROM bframe._all_line_items AS li
 GROUP BY ALL
-{% if _BF_READ_MODE == 'CURRENT' %}
+{% if _BF_READ_MODE in ('STORED', 'HYBRID') %}
 UNION ALL
 SELECT *
-FROM bframe._active_src_invoices
-UNION ALL
-SELECT *
-FROM bframe._historic_src_invoices
+FROM bframe._raw_invoices
 {% endif %}

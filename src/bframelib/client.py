@@ -1,4 +1,5 @@
 import datetime
+from dateutil.relativedelta import relativedelta
 import duckdb
 from typing import NamedTuple
 from pathlib import Path
@@ -34,22 +35,23 @@ class Client():
         else:
             self.con = con
 
-        # TODO Would be better typed
+        # TODO Config can be better typed
+        rating_as_of_dt = datetime.datetime.now()
+        lookback_dt = rating_as_of_dt - relativedelta(months=2)
         self._config = {
             'org_id': None,
             'env_id': None,
             'branch_id': None,
-            'system_dt': (datetime.datetime.now() + datetime.timedelta(days=30)).isoformat(),
-            'rating_as_of_dt': datetime.datetime.now().isoformat(),
-            'rating_range': [],
+            'system_dt': (rating_as_of_dt + datetime.timedelta(days=30)).isoformat(),
+            'rating_as_of_dt': rating_as_of_dt.isoformat(),
+            'rating_range': [lookback_dt.isoformat(), rating_as_of_dt.isoformat()],
+            'stored_rating_range': [lookback_dt.isoformat(), rating_as_of_dt.isoformat()],
             'contract_ids': [],
             'customer_ids': [],
             'product_uids': [],
             'pricebook_ids': [],
             'dedup_branch_events': False,
-            'read_mode': 'CURRENT',
-            'lookback_window': 3,
-            'forward_window': 3,
+            'read_mode': 'VIRTUAL',
         }
         self.set_config(config)
         
@@ -121,21 +123,29 @@ class Client():
             if key in REQUIRED_FIELDS and value == None:
                 raise Exception(f'Required field can not be set to None')
         
-        # Check read_mode has been set correctly
-        if merged_config['read_mode'] in ('CURRENT', 'UNSAVED_CURRENT'):
-            forward_window = merged_config.get('forward_window', None)
-            lookback_window = merged_config.get('lookback_window', None)
-
-            if not isinstance(forward_window, int):
-                raise Exception('`read_mode` CURRENT requires integer `forward_window`')
-            elif not isinstance(lookback_window, int):
-                raise Exception('`read_mode` CURRENT requires integer `lookback_window`')
-        elif merged_config['read_mode'] == 'VIRTUAL':
+        # Check read_mode has been set correctly (STORED, VIRTUAL, HYBRID, UNSTORED_VIRTUAL)
+        # STORED - uses only persisted rated data. From a performance perspective this is best, but requires the data to already be saved
+        # VIRTUAL - generates rated data from the configuration, which can be expensive but is all encompassing
+        # HYBRID - unions STORED and VIRTUAL data to potentially improve performance
+        # UNSTORED_VIRTUAL - removes already stored documents from the dataset allowing for ease of insertion. This is the least performant due to the need for reduction
+        if merged_config['read_mode'] in ('STORED'):
+            stored_rating_range = merged_config.get('stored_rating_range', None)
+            if not isinstance(stored_rating_range, list) or len(stored_rating_range) < 2:
+                raise Exception('`read_mode` STORED requires a valid `stored_rating_range`')
+        elif merged_config['read_mode'] == 'VIRTUAL' or merged_config['read_mode'] == 'UNSTORED_VIRTUAL':
             rating_range = merged_config.get('rating_range', None)
             if not isinstance(rating_range, list) or len(rating_range) < 2:
-                raise Exception('`read_mode` VIRTUAL requires a valid `rating_range`')
+                raise Exception('`read_mode`: VIRTUAL and UNSTORED_VIRTUAL require a valid `rating_range`')
+        elif merged_config['read_mode'] == 'HYBRID':
+            rating_range = merged_config.get('rating_range', None)
+            stored_rating_range = merged_config.get('stored_rating_range', None)
+            if not isinstance(stored_rating_range, list) or len(stored_rating_range) < 2:
+                raise Exception('`read_mode` HYRBID requires a valid `stored_rating_range`')
+            
+            if not isinstance(rating_range, list) or len(rating_range) < 2:
+                raise Exception('`read_mode` HYRBID requires a valid `rating_range`')
         else:
-            raise Exception('`read_mode` can only be set to "CURRENT" or "VIRTUAL"')
+            raise Exception('`read_mode` can only be set to "STORED", "VIRTUAL", "UNSTORED_VIRTUAL" or "HYBRID"')
                 
         
         # Since validation looks good update source connects

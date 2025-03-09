@@ -13,3 +13,7 @@ WHERE org_id = _BF_ORG_ID
 {% if _BF_CUSTOMER_IDS|length > 0 %}
     AND customer_id IN _BF_CUSTOMER_IDS
 {% endif %}
+{% if _BF_READ_MODE in ('VIRTUAL', 'UNSTORED_VIRTUAL', 'HYBRID') %}
+    AND metered_at >= _BF_RATING_RANGE_START 
+    AND metered_at < _BF_RATING_RANGE_END
+{% endif %}

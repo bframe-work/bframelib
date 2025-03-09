@@ -1,5 +1,8 @@
 SELECT *
-FROM bframe.fixed_line_items
-UNION ALL -- This should be UNION ALL, but there is a bug in duckdb preventing this 11/8/2024
-SELECT *
-FROM bframe.event_line_items
+FROM src.line_items
+WHERE org_id = _BF_ORG_ID
+    AND env_id = _BF_ENV_ID
+    AND branch_id = _BF_BRANCH_ID
+    AND created_at <= _BF_SYSTEM_DT
+    AND started_at >= date_trunc('month', CAST(_BF_STORED_RATING_RANGE_START as TIMESTAMP))
+    AND started_at < _BF_STORED_RATING_RANGE_END

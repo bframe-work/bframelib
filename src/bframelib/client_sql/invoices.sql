@@ -1,3 +1,4 @@
+{% if _BF_READ_MODE in ('VIRTUAL', 'HYBRID', 'UNSTORED_VIRTUAL') %}
 SELECT
     li.invoice_id as id,
     _BF_ORG_ID as org_id,
@@ -18,8 +19,11 @@ SELECT
     round(SUM(COALESCE(li.amount, 0.0)), 2) as total
 FROM bframe._all_line_items AS li
 GROUP BY ALL
-{% if _BF_READ_MODE in ('STORED', 'HYBRID') %}
+{% endif %}
+{% if _BF_READ_MODE == 'HYBRID' %}
 UNION ALL
+{% endif %}
+{% if _BF_READ_MODE in ('STORED', 'HYBRID') %}
 SELECT *
 FROM bframe._raw_invoices
 {% endif %}

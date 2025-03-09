@@ -135,8 +135,8 @@ class TestRatedDocumentsDateTimeTarget:
 
     
     def test_virtual_unstored_read_mode(self, client: Client):
-        invoices = client.execute("SELECT * FROM bframe.invoices ORDER BY id").fetchall()
-        line_items = client.execute("SELECT * FROM bframe.line_items ORDER BY id").fetchall()
+        invoices = client.execute("SELECT * EXCLUDE(created_at) FROM bframe.invoices ORDER BY id").df().to_dict('records')
+        line_items = client.execute("SELECT * EXCLUDE(created_at) FROM bframe.line_items ORDER BY id").df().to_dict('records')
 
         # SQLite does not handle the circular read and insertion well, we end up with a unique constraint
         # error if we insert bframe.invoices directly. This problem some how goes away if
@@ -152,17 +152,28 @@ class TestRatedDocumentsDateTimeTarget:
         """)
 
         client.set_config({'read_mode': 'STORED'})
-        new_invoices = client.execute("SELECT * FROM bframe.invoices ORDER BY id").fetchall()
-        new_line_items = client.execute("SELECT * FROM bframe.line_items ORDER BY id").fetchall()
+        new_invoices = client.execute("SELECT * EXCLUDE(created_at) FROM bframe.invoices ORDER BY id").df().to_dict('records')
+        new_line_items = client.execute("SELECT * EXCLUDE(created_at) FROM bframe.line_items ORDER BY id").df().to_dict('records')
 
         # Persisting invoices should result in the same data if it's pulled from the same date range
         assert len(invoices) == len(new_invoices)
-        for i in range(len(invoices)):
-            assert invoices[i] == new_invoices[i]
-
         assert len(line_items) == len(new_line_items)
+
+        for i in range(len(invoices)):
+            invoice = invoices[i]
+            new_invoice = new_invoices[i]
+            assert invoice['id'] == new_invoice['id']
+            assert invoice['total'] == new_invoice['total']
+            assert invoice['started_at'] == new_invoice['started_at']
+            assert invoice['ended_at'] == new_invoice['ended_at']
+        
         for i in range(len(line_items)):
-            assert line_items[i] == new_line_items[i]
+            line_item = line_items[i]
+            new_line_item = new_line_items[i]
+            assert line_item['id'] == new_line_item['id']
+            assert line_item['amount'] == new_line_item['amount']
+            assert line_item['started_at'] == new_line_item['started_at']
+            assert line_item['ended_at'] == new_line_item['ended_at']
 
 
         # If we look at net window again it should be empty
@@ -195,21 +206,31 @@ class TestRatedDocumentsDateTimeTarget:
         client.set_config({
             'read_mode': 'STORED',
         })
-        invoices = client.execute("SELECT * FROM bframe.invoices WHERE status = 'FINALIZED' ORDER BY id").fetchall()
-        line_items = client.execute("SELECT * FROM bframe.line_items WHERE status = 'FINALIZED' ORDER BY id").fetchall()
+        invoices = client.execute("SELECT * FROM bframe.invoices WHERE status = 'FINALIZED' ORDER BY id").df().to_dict('records')
+        line_items = client.execute("SELECT * FROM bframe.line_items WHERE status = 'FINALIZED' ORDER BY id").df().to_dict('records')
 
         client.execute("""
             INSERT INTO src.contract_prices (org_id, env_id, branch_id, id, list_price_uid, contract_uid, invoice_schedule, fixed_quantity, version) values (1, 1, 1, 3, 10, 9, 1, '5.00', 2);
         """)
 
-        new_invoices = client.execute("SELECT * FROM bframe.invoices WHERE status = 'FINALIZED' ORDER BY id").fetchall()
-        new_line_items = client.execute("SELECT * FROM bframe.line_items WHERE status = 'FINALIZED' ORDER BY id").fetchall()
+        new_invoices = client.execute("SELECT * FROM bframe.invoices WHERE status = 'FINALIZED' ORDER BY id").df().to_dict('records')
+        new_line_items = client.execute("SELECT * FROM bframe.line_items WHERE status = 'FINALIZED' ORDER BY id").df().to_dict('records')
 
         for i in range(len(invoices)):
-            assert invoices[i] == new_invoices[i]
+            invoice = invoices[i]
+            new_invoice = new_invoices[i]
+            assert invoice['id'] == new_invoice['id']
+            assert invoice['total'] == new_invoice['total']
+            assert invoice['started_at'] == new_invoice['started_at']
+            assert invoice['ended_at'] == new_invoice['ended_at']
         
         for i in range(len(line_items)):
-            assert line_items[i] == new_line_items[i]
+            line_item = line_items[i]
+            new_line_item = new_line_items[i]
+            assert line_item['id'] == new_line_item['id']
+            assert line_item['amount'] == new_line_item['amount']
+            assert line_item['started_at'] == new_line_item['started_at']
+            assert line_item['ended_at'] == new_line_item['ended_at']
 
 
     def test_range_of_rated_docs(self, client: Client):

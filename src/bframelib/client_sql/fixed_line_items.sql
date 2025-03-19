@@ -25,13 +25,13 @@ SELECT
     round(
         ps.quantity
         * ps.proration_factor
-        * COALESCE(CAST(ps.price AS decimal), 0.0),
+        * COALESCE(CAST(ps.price AS DECIMAL), 0.0),
         2
     ) AS amount
 FROM (
     SELECT
         staging.*,
-        COALESCE(staging.fixed_quantity, 1) AS quantity,
+        COALESCE(CAST(staging.fixed_quantity as DECIMAL), 1.0) AS quantity,
         (CASE staging.prorate
             WHEN TRUE
             THEN (

@@ -170,6 +170,7 @@ class TestBframeClient:
         client.set_source(Source('branch', branch_source_connect, True))
         res = client.execute("SELECT * FROM bframe.invoices WHERE contract_id = '88';")
         invoices = res.df().to_dict('records')
+
         assert len(invoices) == 13
 
         # update the invoice schedule to happen every 2 months instead of 1

@@ -1,6 +1,7 @@
 import duckdb
 from pathlib import Path
 from bframelib import Client, DEFAULT_SOURCES
+import pandas as pd
 
 # Initially I looked into how to unpack dictionaries a bit more cleanly, but the sqlite3 library doesn't have anything to solve this case
 # The recommendation is to use the sqlite string argument interpolation, and not string interpolation due to risk of sql injection
@@ -35,5 +36,31 @@ def standard_duckdb_client(config: dict = {}, sources = DEFAULT_SOURCES, connect
     connection = duckdb.connect()
     c = Client(config, sources, connection)
     seed = Path('./tests/fixtures/1_seed.sql').read_text()
+    c.execute("SET TIMEZONE='UTC'")
     c.execute(seed)
     return (c, config)
+
+
+# This is necessary since sqlite doesn't support timestamptz. It is assumed everything is one tz.
+# Thus we must transform timestamps that come from sqlite to utc
+def apply_utc_on_cols(df: pd.DataFrame):
+    columns: list[str] = []
+    
+    # If no columns specified, find all datetime columns without timezone
+    for col in df.columns:
+        # Check if it's a datetime column without timezone info
+        if pd.api.types.is_datetime64_dtype(df[col]) and df[col].dt.tz is None:
+            columns.append(col)
+    
+    # Process each column
+    for col in columns:
+        # Skip columns that don't exist
+        if col not in df.columns:
+            print(f"Warning: Column '{col}' not found in dataframe")
+            continue
+            
+        try:
+            if pd.api.types.is_datetime64_dtype(df[col]):
+                df[col] = pd.to_datetime(df[col], utc=True)
+        except Exception as e:
+            print(f"Error processing column '{col}': {str(e)}")

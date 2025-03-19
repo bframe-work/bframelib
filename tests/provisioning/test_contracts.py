@@ -1,5 +1,6 @@
 import datetime
 from bframelib import Client
+from utils import apply_utc_on_cols
 
 
 class TestContracts:  
@@ -24,10 +25,13 @@ class TestContracts:
     
     def test_contract_deduplication(self, client: Client):
         res = client.execute(f"SELECT * FROM bframe.contracts WHERE durable_id = '87';")
-        contracts = res.fetchdf().to_dict('records')
+        df = res.df()
+        apply_utc_on_cols(df)
+
+        contracts = df.to_dict('records')
         assert len(contracts) == 1
 
-        assert contracts[0]['ended_at'] == datetime.datetime(2024, 2, 1)
+        assert contracts[0]['ended_at'] == datetime.datetime(2024, 2, 1, tzinfo=datetime.timezone.utc)
     
     def test_void_contract(self, client: Client):
         res = client.execute(f"SELECT * FROM bframe.contracts WHERE durable_id = '220';")

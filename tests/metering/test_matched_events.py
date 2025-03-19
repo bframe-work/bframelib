@@ -1,6 +1,8 @@
 
 import datetime
 import json
+from bframelib.client import Client
+from utils import apply_utc_on_cols
 
 
 class TestMatchedEvents:
@@ -34,14 +36,16 @@ class TestMatchedEvents:
         # Check if the quantity is correct
         assert quantity == 3
     
-    def test_multi_filters(self, client):
+    def test_multi_filters(self, client: Client):
         res = client.execute(f"SELECT * FROM bframe.matched_events WHERE product_uid = 6 and customer_id = '150' ORDER BY metered_at ASC;")
-        matched_events = res.fetchdf().to_dict('records')
+        df = res.df()
+        apply_utc_on_cols(df)
+        matched_events = df.to_dict('records')
 
         # Ensure there are the correct number of matched_events. This includes all events not just those for one customer
         assert len(matched_events) == 2
 
         # Check if the quantity is correct
-        assert matched_events[0]['metered_at'] == datetime.datetime(2023, 12, 2, 1)
+        assert matched_events[0]['metered_at'] == datetime.datetime(2023, 12, 2, 1, tzinfo=datetime.timezone.utc)
         assert json.loads(matched_events[0]['properties']).get('region', None) == None
         assert json.loads(matched_events[1]['properties'])['region'] == 'us-east-1'

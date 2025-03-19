@@ -170,7 +170,7 @@ class Client():
     def get_price_span_date_range(self, product_types: tuple): 
         # Takes a list of product types to include (EVENT, FIXED)
         return self.execute(f"""
-            SELECT date_trunc('month', MIN(started_at))::timestamp, date_trunc('month', MAX(ended_at))::timestamp
+            SELECT date_trunc('month', MIN(started_at))::timestamptz, date_trunc('month', MAX(ended_at))::timestamptz
             FROM bframe.price_spans
             WHERE product_type IN {str(product_types)}
         """).fetchone()

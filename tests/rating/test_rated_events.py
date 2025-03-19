@@ -1,15 +1,19 @@
 
 import datetime
+from bframelib.client import Client
+from utils import apply_utc_on_cols
 
 
 class TestRatedEvents:
-    def test_insert_rated_events(self, client):
+    def test_insert_rated_events(self, client: Client):
         res = client.execute("INSERT INTO src.rated_events BY NAME (SELECT '1' as id, * FROM bframe.rated_events limit 1);")
         assert res.fetchone() == (1,)
     
-    def test_empty_rated_event(self, client):
+    def test_empty_rated_event(self, client: Client):
         res = client.execute(f"SELECT * FROM bframe.rated_events WHERE contract_id = '88' AND ended_at = '2023-04-01';")
-        rated_events = res.fetchdf().to_dict('records')
+        df = res.df()
+        apply_utc_on_cols(df)
+        rated_events = df.to_dict('records')
 
         # There should be two rated events one for each product
         assert len(rated_events) == 2
@@ -20,11 +24,11 @@ class TestRatedEvents:
 
         # Check the rated event has the necessary field values
         assert rated_events[0]['properties'] == '{}'
-        assert rated_events[0]['metered_at'] == datetime.datetime(2023, 3, 1)
-        assert rated_events[0]['received_at'] == datetime.datetime(2023, 3, 1)
+        assert rated_events[0]['metered_at'] == datetime.datetime(2023, 3, 1, tzinfo=datetime.timezone.utc)
+        assert rated_events[0]['received_at'] == datetime.datetime(2023, 3, 1, tzinfo=datetime.timezone.utc)
         assert rated_events[0]['customer_id'] == '10'
     
-    def test_generic_rated_events(self, client):
+    def test_generic_rated_events(self, client: Client):
         res = client.execute(f"SELECT * FROM bframe.rated_events WHERE contract_id = '88' ORDER BY metered_at ASC;")
         rated_events = res.fetchdf().to_dict('records')
 
@@ -39,7 +43,7 @@ class TestRatedEvents:
         assert sum(totals, 0) == 4*.25 + 3*.5
     
     # Testing slowly changing dimensions (scd) on a month end change
-    def test_scd_rated_events(self, client):
+    def test_scd_rated_events(self, client: Client):
         res = client.execute(f"SELECT * FROM bframe.rated_events WHERE contract_id = '99' ORDER BY metered_at ASC;")
         rated_events = res.fetchdf().to_dict('records')
 
@@ -54,7 +58,7 @@ class TestRatedEvents:
         assert sum(totals, 0) == 1*.25 + 2*.33
 
     # Testing slowly changing dimensions (scd) on a mid month change
-    def test_scd_mm_rated_events(self, client):
+    def test_scd_mm_rated_events(self, client: Client):
         res = client.execute(f"SELECT * FROM bframe.rated_events WHERE contract_id = '100' ORDER BY metered_at ASC;")
         rated_events = res.fetchdf().to_dict('records')
 
@@ -70,7 +74,7 @@ class TestRatedEvents:
         assert sum(totals, 0) == 1*.25 + 1*.33
 
     # Test quarterly and offset contracts
-    def test_offset_quarterly_contract_rated_events(self, client):
+    def test_offset_quarterly_contract_rated_events(self, client: Client):
         res = client.execute(f"SELECT * FROM bframe.rated_events WHERE contract_id = '110' ORDER BY metered_at ASC;")
         rated_events = res.fetchdf().to_dict('records')
 
@@ -85,7 +89,7 @@ class TestRatedEvents:
         assert sum(totals, 0) == 4*.25
     
     # Test customer SCDs
-    def test_customer_scd_rated_events(self, client):
+    def test_customer_scd_rated_events(self, client: Client):
         res = client.execute(f"SELECT * FROM bframe.rated_events WHERE contract_id = '160' ORDER BY metered_at ASC;")
         rated_events = res.fetchdf().to_dict('records')
 

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bframelib"
-version = "0.1.17"
+version = "0.1.18"
 description = "An open source billing framework to generate, view and diff invoices locally."
 readme = "README.md"
 authors = [{ name = "Allan Blair", email = "allan@bframe.work" }]

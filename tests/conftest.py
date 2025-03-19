@@ -55,6 +55,7 @@ def sqlite_client():
     connection = duckdb.connect()
     c = Client(config, sources, connection)
     seed = Path('./tests/fixtures/1_seed.sql').read_text()
+    c.execute("SET TIMEZONE='UTC'")
     c.execute(seed)
     yield SourceClient(c, config)
     Path(sqlite_db_path).unlink(True)
@@ -97,6 +98,7 @@ def postgres_client():
 
     
     seed = Path('./tests/fixtures/1_seed.sql').read_text()
+    c.execute("SET TIMEZONE='UTC'")
     c.execute(seed)
     yield SourceClient(c, config)
     subprocess.run("docker compose -f ./tests/postgres/docker-compose.yml down", shell=True)

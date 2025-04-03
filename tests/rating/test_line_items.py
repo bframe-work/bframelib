@@ -119,6 +119,9 @@ class TestLineItems:
         
         # Pull all of the totals from each line item to ensure they reconcile
         totals = []
+        quantity = []
         for line_item in line_items:
             totals.append(line_item['amount'])
+            quantity.append(line_item['quantity'])
         assert sum(totals, 0) == 2*100 + 10*999
+        assert sum(quantity, 0) == 2 + 10

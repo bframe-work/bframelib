@@ -23,7 +23,7 @@ def standard_duckdb_client(config: dict = {}, sources = DEFAULT_SOURCES, connect
     config['org_id'] = config.get('org_id', 1)
     config['env_id'] = config.get('env_id', 1)
     config['branch_id'] = config.get('branch_id', 1)
-    config['system_dt'] = config.get('system_dt', '2025-12-31')
+    config['prod_system_dt'] = config.get('prod_system_dt', '2025-12-31')
     config['rating_range'] = config.get('rating_range', ['1900-01-01', '2200-01-01'])
     config['stored_rating_range'] = config.get('stored_rating_range', ['1900-01-01', '2200-01-01'])
     config['contract_ids'] = config.get('contract_ids', [])

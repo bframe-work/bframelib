@@ -33,7 +33,7 @@ FROM bframe.matched_events AS me
 RIGHT JOIN bframe.price_spans AS ps
     ON me.product_uid = ps.product_uid
     AND me.metered_at >= ps.effective_at 
-    AND me.metered_at < date_trunc('day', ps.ineffective_at)
+    AND me.metered_at <  ps.ineffective_at
     AND me.customer_id = ps.customer_id
 WHERE me.product_type = 'EVENT'
     OR ps.product_type = 'EVENT'

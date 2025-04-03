@@ -10,7 +10,7 @@ class TestBframeClient:
         }
         c = Client(config)
         
-        assert c.config['system_dt'] != None
+        assert c.config['prod_system_dt'] != None
         assert c.config['rating_as_of_dt'] != None
         assert c.config['contract_ids'] == []
         assert len(c.config['rating_range']) == 2
@@ -213,3 +213,19 @@ class TestBframeClient:
 
         # The 27 events included along with the 23 empty rated events for other periods
         assert len(rated_events) == 50
+    
+    def test_prod_system_dt(self, client: Client):
+        client.set_config({'prod_system_dt': '2000-02-01'})
+        customers = client.execute('SELECT * FROM bframe.customers;').fetchall()
+
+        assert len(customers) == 0
+    
+    def test_branch_system_dt(self, client: Client):
+        client.set_config({
+            'branch_id': 2,
+            'prod_system_dt': '2000-02-01',
+            'branch_system_dt': '2026-01-01'
+        })
+        customers = client.execute('SELECT * FROM bframe.customers;').fetchall()
+
+        assert len(customers) == 2

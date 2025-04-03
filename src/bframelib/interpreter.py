@@ -95,8 +95,15 @@ class Interpreter:
                 new_query = re.sub(full_match.group(), str(vars.get('org_id')), new_query)
             case 'ENV_ID':
                 new_query = re.sub(full_match.group(), str(vars.get('env_id')), new_query)
-            case 'SYSTEM_DT':
-                new_query = re.sub(full_match.group(), f"'{vars.get('system_dt')}'", new_query)
+            case 'PROD_SYSTEM_DT':
+                new_query = re.sub(full_match.group(), f"'{vars.get('prod_system_dt')}'", new_query)
+            case 'BRANCH_SYSTEM_DT':
+                # If there is no branch system datetime just use the production system datetime
+                branch_system_dt = vars.get('branch_system_dt')
+                if (branch_system_dt):
+                    new_query = re.sub(full_match.group(), f"'{vars.get('branch_system_dt')}'", new_query)
+                else:
+                    new_query = re.sub(full_match.group(), f"'{vars.get('prod_system_dt')}'", new_query)
             case 'RATING_AS_OF_DT':
                 new_query = re.sub(full_match.group(), f"'{vars.get('rating_as_of_dt')}'", new_query)
             case 'DEDUP_BRANCH_EVENTS':

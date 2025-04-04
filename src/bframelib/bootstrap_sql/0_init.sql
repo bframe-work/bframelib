@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS environments (
 CREATE TABLE IF NOT EXISTS branches (
     id INTEGER NOT NULL,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    checkpoint_at TIMESTAMPTZ,
     name TEXT NOT NULL,
     org_id INTEGER,
     env_id INTEGER,

@@ -2,7 +2,7 @@ import os
 import pathlib
 
 PATH = os.path.dirname(__file__)
-__version__ = "0.1.20"
+__version__ = "0.1.21"
 
 # PATH must be exported first since subsequent modules reference it
 from .client import Client, Source, DEFAULT_SOURCES
